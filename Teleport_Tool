@@ -1,22 +1,25 @@
--- [[ Universal Teleport Tool ]]
--- [[ Made by zerquesth ]]
+--[[
+universal teleport tool [works everywhere]
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
+made by cell0ph1ne
+]]
 
-local function createTeleportTool()
+local plrs = game:GetService("Players")
+local plr = plrs.LocalPlayer
+local mouse = plr:GetMouse()
+
+local function crtTTool()
     local tool = Instance.new("Tool")
     tool.Name = "Teleport Tool"
     tool.RequiresHandle = false
     tool.CanBeDropped = true
-    tool.Parent = LocalPlayer.Backpack
+    tool.Parent = plr.Backpack
 
     tool.Activated:Connect(function()
-        local character = LocalPlayer.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local hrp = character.HumanoidRootPart
-            local target = Mouse.Hit
+        local char = plr.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            local target = mouse.Hit
             if target then
                 hrp.CFrame = CFrame.new(target.Position)
             end
@@ -24,10 +27,10 @@ local function createTeleportTool()
     end)
 end
 
-createTeleportTool()
+crtTTool()
 
-LocalPlayer.CharacterAdded:Connect(function()
-    if not LocalPlayer.Backpack:FindFirstChild("Teleport Tool") then
-        createTeleportTool()
+plr.CharacterAdded:Connect(function()
+    if not plr.Backpack:FindFirstChild("Teleport Tool") then
+        crtTTool()
     end
 end)
