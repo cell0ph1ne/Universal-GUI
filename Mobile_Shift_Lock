@@ -1,0 +1,157 @@
+--[[
+    made by cell0ph1ne btw thanks for using my scripts
+]]
+
+local plrs = game:GetService("Players")
+local runS = game:GetService("RunService")
+local CAService = game:GetService("ContextActionService")
+local UInputService = game:GetService("UserInputService")
+
+local plr = plrs.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local imgB
+local actCon = nil
+local SLEnabled = false
+
+local sl_on = CFrame.new(1.5, 0, 0)
+local sl_off = CFrame.new(-1.5, 0, 0)
+
+local states = {
+    off = "rbxasset://textures/ui/mouseLock_off@2x.png",
+    on = "rbxasset://textures/ui/mouseLock_on@2x.png"
+}
+
+local function updImg(state)
+    if imgB then
+        imgB.Image = states[state]
+    end
+end
+
+local function updAR(humanoid, enabled)
+    if humanoid then
+        humanoid.AutoRotate = enabled
+    end
+end
+
+local function cameraCFrame(rootPos, lookVector)
+    return CFrame.new(rootPos, Vector3.new(lookVector.X * 9e9, rootPos.Y, lookVector.Z * 9e9))
+end
+
+local function enableShiftlock()
+    local character = plr.Character
+    if not character then return end
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart or not camera then return end
+    local rootPos = rootPart.Position
+    rootPart.CFrame = cameraCFrame(rootPos, camera.CFrame.LookVector)
+    if camera then
+        camera.CFrame = camera.CFrame * sl_on
+    end
+end
+
+local function cleanupShiftlock()
+    if actCon then
+        actCon:Disconnect()
+        actCon = nil
+    end
+end
+
+local function shiftlockON()
+    local character = plr.Character
+    if not character then return end
+    local humanoid = character:FindFirstChild("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not rootPart then return end
+
+    if not SLEnabled then
+        SLEnabled = true
+        updAR(humanoid, false)
+        updImg("on")
+        if camera then
+            camera.CFrame = camera.CFrame * sl_on
+        end
+        
+        actCon = runS.RenderStepped:Connect(function()
+            if not plr.Character or not plr.Character:FindFirstChild("Humanoid") then
+                cleanupShiftlock()
+                SLEnabled = false
+                updImg("off")
+                return
+            end
+            enableShiftlock()
+        end)
+    else
+        SLEnabled = false
+        cleanupShiftlock()
+        updAR(humanoid, true)
+        updImg("off")
+        if camera then
+            camera.CFrame = camera.CFrame * sl_off
+        end
+    end
+end
+
+local function applyStoredState()
+    if SLEnabled then
+        shiftlockON()
+    else
+        cleanupShiftlock()
+    end
+end
+
+local function createGUI()
+    local plrGui = plr:WaitForChild("PlayerGui")
+    local existing = plrGui:FindFirstChild("w31rd_shiftlock")
+    if existing then existing:Destroy() end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "w31rd_shiftlock"
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = plrGui
+
+    imgB = Instance.new("ImageButton")
+    imgB.Parent = screenGui
+    imgB.Active = true
+    imgB.Draggable = true
+    imgB.BackgroundTransparency = 1
+    imgB.Position = UDim2.new(0.761914339, 0, 0.742375436, 0)
+    imgB.Size = UDim2.new(0.062, 0, 0.067, 0)
+    imgB.SizeConstraint = Enum.SizeConstraint.RelativeXX
+    imgB.Image = states.off
+    imgB.Visible = UInputService.TouchEnabled
+
+    imgB.MouseButton1Click:Connect(shiftlockON)
+    CAService:BindAction("ShiftLock", shiftlockON, false, "on")
+    CAService:SetPosition("ShiftLock", UDim2.new(0.8, 0, 0.8, 0))
+
+    applyStoredState()
+end
+
+local function chrAdded(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    updAR(humanoid, not SLEnabled)
+
+    if not plr:FindFirstChild("PlayerGui") then
+        plr:WaitForChild("PlayerGui")
+    end
+    
+    if not plr.PlayerGui:FindFirstChild("w31rd_shiftlock") then
+        createGUI()
+    else
+        imgB = plr.PlayerGui["w31rd_shiftlock"]:FindFirstChildOfClass("ImageButton")
+        applyStoredState()
+    end
+end
+
+local function chrRemoving()
+    cleanupShiftlock()
+end
+
+if plr.Character then
+    chrAdded(plr.Character)
+end
+plr.CharacterAdded:Connect(chrAdded)
+plr.CharacterRemoving:Connect(chrRemoving)
