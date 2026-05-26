@@ -1,18 +1,17 @@
 --[[
-universal teleport tool [works everywhere]
-
-made by cell0ph1ne
+    made by cell0ph1ne btw thanks for using my scripts
 ]]
 
 local plrs = game:GetService("Players")
 local plr = plrs.LocalPlayer
 local mouse = plr:GetMouse()
+local sg = game:GetService("StarterGui")
 
-local function crtTTool()
+local function crtTT()
     local tool = Instance.new("Tool")
     tool.Name = "Teleport Tool"
     tool.RequiresHandle = false
-    tool.CanBeDropped = true
+    tool.CanBeDropped = true --press "backspace" to drop it
     tool.Parent = plr.Backpack
 
     tool.Activated:Connect(function()
@@ -21,16 +20,27 @@ local function crtTTool()
             local hrp = char.HumanoidRootPart
             local target = mouse.Hit
             if target then
-                hrp.CFrame = CFrame.new(target.Position)
+                local targetPos = target.Position
+                local currentPos = hrp.Position
+                if (targetPos - currentPos).Magnitude > 4250 then
+                    sg:SetCore("SendNotification", {
+                        Title = "Error!",
+                        Text = "Too far! Max distance 4250 studs", --you can't teleport too far
+                        Duration = 3
+                    })
+                    return
+                end
+                hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
             end
         end
     end)
 end
 
-crtTTool()
+crtTT()
 
-plr.CharacterAdded:Connect(function()
+plr.CharacterAdded:Connect(function() --when you die the tool is again create in your backpack
+    task.wait()
     if not plr.Backpack:FindFirstChild("Teleport Tool") then
-        crtTTool()
+        crtTT()
     end
 end)
