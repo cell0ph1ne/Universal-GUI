@@ -113,7 +113,7 @@ function Tools:CreateWindow(Title)
     Items_1.BackgroundTransparency = 1
     Items_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Items_1.BorderSizePixel = 0
-    Items_1.Size = UDim2.new(0, 220, 0, 104)
+    Items_1.Size = UDim2.new(0, 220, 0, 118)
     Items_1.ClipsDescendants = true
     Items_1.AutomaticCanvasSize = Enum.AutomaticSize.Y
     Items_1.BottomImage = "rbxasset://textures/ui/Scroll/scroll-bottom.png"
